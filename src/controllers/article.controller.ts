@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
 import { createArticleSchema, updateArticleSchema } from "../validators/article.validator";
@@ -109,4 +109,48 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
   });
 
   return res.json(successResponse("Article soft deleted"));
+};
+
+
+export const getPublicArticles = async (req: Request, res: Response) => {
+  const { category, author, q } = req.query;
+  const page = Number(req.query.page) || 1;
+  const size = Number(req.query.size) || 10;
+
+  const where: any = {
+    status: "Published",
+    deletedAt: null
+  };
+
+  if (category) where.category = category;
+
+  if (author) {
+    where.author = {
+      name: { contains: author as string, mode: "insensitive" }
+    };
+  }
+
+  if (q) {
+    where.title = { contains: q as string, mode: "insensitive" };
+  }
+
+  const articles = await prisma.article.findMany({
+    where,
+    include: { author: true },
+    skip: (page - 1) * size,
+    take: size,
+    orderBy: { createdAt: "desc" }
+  });
+
+  const total = await prisma.article.count({ where });
+
+  return res.json({
+    Success: true,
+    Message: "Public Articles",
+    Object: articles,
+    PageNumber: page,
+    PageSize: size,
+    TotalSize: total,
+    Errors: null
+  });
 };
