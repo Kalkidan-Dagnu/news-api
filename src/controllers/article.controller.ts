@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
-import { createArticleSchema } from "../validators/article.validator";
+import { createArticleSchema, updateArticleSchema } from "../validators/article.validator";
 import { AuthRequest } from "../middleware/auth.middleware";
 
 export const createArticle = async (
@@ -54,4 +54,59 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
     TotalSize: total,
     Errors: null
   });
+};
+
+
+export const updateArticle = async (req: AuthRequest, res: Response) => {
+  let id = req.params.id;
+  if (Array.isArray(id)) {
+    id = id[0];
+  }
+
+  const article = await prisma.article.findUnique({ where: { id } });
+
+  if (!article || article.authorId !== req.user!.id) {
+    return res.status(403).json(
+      errorResponse("Forbidden", ["You can only edit your own articles"])
+    );
+  }
+
+  try {
+    const data = updateArticleSchema.parse(req.body);
+
+    const updated = await prisma.article.update({
+      where: { id },
+      data
+    });
+
+    return res.json(successResponse("Article updated", updated));
+
+  } catch (err: any) {
+    return res.status(400).json(
+      errorResponse("Validation Error", [err.message])
+    );
+  }
+};
+
+
+export const deleteArticle = async (req: AuthRequest, res: Response) => {
+  let id = req.params.id;
+  if (Array.isArray(id)) {
+    id = id[0];
+  }
+
+  const article = await prisma.article.findUnique({ where: { id } });
+
+  if (!article || article.authorId !== req.user!.id) {
+    return res.status(403).json(
+      errorResponse("Forbidden", ["You can only delete your own articles"])
+    );
+  }
+
+  await prisma.article.update({
+    where: { id },
+    data: { deletedAt: new Date() }
+  });
+
+  return res.json(successResponse("Article soft deleted"));
 };

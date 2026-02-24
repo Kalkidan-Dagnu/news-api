@@ -6,3 +6,5 @@ export const createArticleSchema = z.object({
   category: z.string().min(1),
   status: z.enum(["Draft", "Published"]).optional()
 });
+
+export const updateArticleSchema = createArticleSchema.partial();
