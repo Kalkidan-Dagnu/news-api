@@ -3,13 +3,13 @@ import { authenticate } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/rbac.middleware";
 import { createArticle } from "../controllers/article.controller";
 
-const router = Router();
+const articleRouter = Router();
 
-router.post(
+articleRouter.post(
   "/",
   authenticate,
   authorize("author"),
   createArticle
 );
 
-export default router;
+export default articleRouter;
