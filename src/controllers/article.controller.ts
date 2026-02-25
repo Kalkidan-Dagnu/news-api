@@ -154,3 +154,31 @@ export const getPublicArticles = async (req: Request, res: Response) => {
     Errors: null
   });
 };
+
+export const getDashboard = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  const articles = await prisma.article.findMany({
+    where: {
+      authorId: req.user!.id,
+      deletedAt: null
+    },
+    include: {
+      analytics: true
+    }
+  });
+
+  const result = articles.map(article => ({
+    title: article.title,
+    createdAt: article.createdAt,
+    totalViews: article.analytics.reduce(
+      (sum, day) => sum + day.viewCount,
+      0
+    )
+  }));
+
+  return res.json(
+    successResponse("Author dashboard", result)
+  );
+};

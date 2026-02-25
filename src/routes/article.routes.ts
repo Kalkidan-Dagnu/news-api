@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth.middleware";
 import { authenticateOptional } from "../middleware/optionalAuth.middleware";
 import { authorize } from "../middleware/rbac.middleware";
-import { createArticle, deleteArticle, getMyArticles, getPublicArticles, updateArticle } from "../controllers/article.controller";
+import { createArticle, deleteArticle, getMyArticles, getPublicArticles, updateArticle, getDashboard} from "../controllers/article.controller";
 import { getArticleById } from "../controllers/auth.controller";
 
 const articleRouter = Router();
@@ -46,4 +46,10 @@ articleRouter.get(
     getArticleById
 );
 
+articleRouter.get(
+  "/dashboard",
+  authenticate,
+  authorize("author"),
+  getDashboard
+);
 export default articleRouter;
