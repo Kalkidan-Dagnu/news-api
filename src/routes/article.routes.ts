@@ -6,7 +6,32 @@ import { createArticle, deleteArticle, getMyArticles, getPublicArticles, updateA
 import { getArticleById } from "../controllers/auth.controller";
 
 const articleRouter = Router();
-
+/**
+ * @swagger
+ * /articles:
+ *   get:
+ *     summary: Get public published articles
+ *     tags: [Articles]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by category
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: string
+ *         description: Partial author name match
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search in title
+ *     responses:
+ *       200:
+ *         description: List of articles
+ */             
 articleRouter.post(
     "/",
     authenticate,
@@ -53,31 +78,6 @@ articleRouter.get(
   getDashboard
 );
 
-/**
- * @swagger
- * /articles:
- *   get:
- *     summary: Get public published articles
- *     tags: [Articles]
- *     parameters:
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: Filter by category
- *       - in: query
- *         name: author
- *         schema:
- *           type: string
- *         description: Partial author name match
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         description: Search in title
- *     responses:
- *       200:
- *         description: List of articles
- */
+
 
 export default articleRouter;
