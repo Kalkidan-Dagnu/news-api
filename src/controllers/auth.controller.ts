@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { signupSchema } from "../validators/auth.validator";
 import { successResponse, errorResponse } from "../utils/response";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -76,4 +77,39 @@ export const login = async (req: Request, res: Response) => {
       errorResponse("Server error", [err.message])
     );
   }
+};
+
+export const getArticleById = async (req: AuthRequest, res: Response) => {
+
+  let { id } = req.params;
+  if (Array.isArray(id)) {
+    id = id[0];
+  }
+
+  const article = await prisma.article.findUnique({
+    where: { id }
+  });
+
+  if (!article || article.deletedAt) {
+    return res.status(404).json(
+      errorResponse("News article no longer available", [])
+    );
+  }
+
+  // Send response immediately
+  res.json(successResponse("Article details", article));
+
+  // Non-blocking read tracking
+  setImmediate(async () => {
+    try {
+      await prisma.readLog.create({
+        data: {
+          articleId: article.id,
+          readerId: req.user?.id ?? null
+        }
+      });
+    } catch (error) {
+      console.error("ReadLog error:", error);
+    }
+  });
 };
