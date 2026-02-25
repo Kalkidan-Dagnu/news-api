@@ -8,3 +8,11 @@ authRoutes.post("/signup", signup);
 export default authRoutes;
 
 authRoutes.post("/login", login);
+
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Auth]
+ */

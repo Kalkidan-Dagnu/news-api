@@ -3,6 +3,7 @@ import { prisma } from "../config/prisma";
 import { successResponse, errorResponse } from "../utils/response";
 import { createArticleSchema, updateArticleSchema } from "../validators/article.validator";
 import { AuthRequest } from "../middleware/auth.middleware";
+import { redis } from "../config/redis";
 
 export const createArticle = async (
   req: AuthRequest,
@@ -134,6 +135,7 @@ export const getPublicArticles = async (req: Request, res: Response) => {
     where.title = { contains: q as string, mode: "insensitive" };
   }
 
+  
   const articles = await prisma.article.findMany({
     where,
     include: { author: true },
